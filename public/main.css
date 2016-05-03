@@ -1,0 +1,18 @@
+/* General Helpers */
+.center-kids {display: -ms-flexbox; -ms-flex-pack: center; -ms-flex-align: center; display: flex; justify-content: center; align-items: center;}
+
+/* Container Classes */
+.product-customizer {width:100%; margin: 0 auto; postion:relative;}
+.customizer-toolbar {width: 22%; position:relative; display:inline-block; vertical-align: top;}
+.canvas-container {width: 56.6666666667%; display:inline-block; }
+
+
+/* Toolbar Features */
+#feature-callout-container {padding: 0 20px;}
+#features-toolbar {position:absolute; top:0; right:-31px;}
+.toolbar-feature {width:30px; height:30px; background-color:red; border-bottom:1px solid grey; text-align:center; color:white;}
+.toolbar-feature[selected=true] {background-color:blue;}
+.feature-option-list {display:none;}
+.feature-option-list[visible=true] {display:block;}
+.feature-callout {display:none;}
+.feature-callout[visible=true] {display:block;}
