@@ -265,4 +265,6 @@ ProductCustomizer.prototype = {
 // Launch Customizer
 var productCustomizer = new ProductCustomizer();
 
-productCustomizer.initializeCustomizer();
+productCustomizer.spritesheet.onload = function(event){
+  productCustomizer.initializeCustomizer();
+}
