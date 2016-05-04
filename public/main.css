@@ -9,10 +9,11 @@
 
 /* Toolbar Features */
 #feature-callout-container {padding: 0 20px;}
-#features-toolbar {position:absolute; top:0; right:-31px;}
+#features-toolbar {position:absolute; top:0; right:-34px;}
 .toolbar-feature {width:30px; height:30px; background-color:red; border-bottom:1px solid grey; text-align:center; color:white;}
 .toolbar-feature[selected=true] {background-color:blue;}
 .feature-option-list {display:none;}
 .feature-option-list[visible=true] {display:block;}
 .feature-callout {display:none;}
 .feature-callout[visible=true] {display:block;}
+.option-label {display:inline-block; margin:5px;}

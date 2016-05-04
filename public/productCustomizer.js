@@ -1,6 +1,8 @@
 var ProductCustomizer = function(){
   this.canvas = document.getElementById('customizer-canvas'),
   this.context = this.canvas.getContext('2d'),
+  this.spritesheet = new Image(),
+  this.spritesheet.src = 'images/spritesheet.png';
 
   // Metadata
   this.features = [
@@ -9,10 +11,12 @@ var ProductCustomizer = function(){
       id: "zipper",
       description: "Han Solo ipsum dolor sit amet organa darth mon mace dagobah alderaan coruscant hutt ben amidala. Solo kashyyyk dooku skywalker mandalore boba jabba. Kamino moff calrissian kenobi luuke dooku ackbar.",
       optionType: "radio",
+      cells: {left: 0, top: 0, width: 800, height: 400},
+      optionPlacement: {left: 100, top: 200},
       options: [
-        {title: "Short"},
-        {title: "3/4", cost: 10},
-        {title: "Full", cost: 10}
+        {title: "Short", left: 0, top: 400, width: 100, height: 100},
+        {title: "3/4", cost: 10, left: 100, top: 400, width: 100, height: 100},
+        {title: "Full", cost: 10, left: 200, top: 400, width: 100, height: 100}
       ]
     },
 
@@ -20,10 +24,12 @@ var ProductCustomizer = function(){
       id: "zipper-pocket",
       description: "Lucas ipsum dolor sit amet organa darth mon mace dagobah alderaan coruscant hutt ben amidala. Solo kashyyyk dooku skywalker mandalore boba jabba. Kamino moff calrissian kenobi luuke dooku ackbar.",
       optionType: "radio",
+      cells: {left: 800, top: 0, width: 800, height: 400},
+      optionPlacement: {left: 300, top: 100},
       options: [
-        {title: "Without"},
-        {title: "With", cost: 5},
-        {title: "With + Reflective", cost: 10}
+        {title: "Without", left: 300, top: 400, width: 100, height: 100},
+        {title: "With", cost: 5, left: 400, top: 400, width: 100, height: 100},
+        {title: "With + Reflective", cost: 10, left: 500, top: 400, width: 100, height: 100}
       ]
     },
 
@@ -31,11 +37,13 @@ var ProductCustomizer = function(){
       id: "stitching-type",
       description: "Yoda ipsum dolor sit amet organa darth mon mace dagobah alderaan coruscant hutt ben amidala. Solo kashyyyk dooku skywalker mandalore boba jabba. Kamino moff calrissian kenobi luuke dooku ackbar.",
       optionType: "radio",
+      cells: {left: 1600, top: 0, width: 800, height: 400},
+      optionPlacement: {left: 00, top: 300},
       options: [
-        {title: "Power Seam"},
-        {title: "Power Seam Flat", cost: 10},
-        {title: "Power Seam Piping / Side Panels", cost: 10},
-        {title: "Power Seam Piping Arms / Side Panels", cost: 10},
+        {title: "Power Seam", left: 600, top: 400, width: 100, height: 100},
+        {title: "Power Seam Flat", cost: 10, left: 700, top: 400, width: 100, height: 100},
+        {title: "Power Seam Piping / Side Panels", cost: 10, left: 800, top: 400, width: 100, height: 100},
+        {title: "Power Seam Piping Arms / Side Panels", cost: 10, left: 900, top: 400, width: 100, height: 100},
       ]
     },
 
@@ -50,7 +58,7 @@ ProductCustomizer.prototype = {
     for(var i=0; i < productCustomizer.features.length; i++){
 
       // Get Toolbar and append Toolbar Features
-      this.initializeToolbar(i);
+      this.initializeFeatures(i);
 
       // Create Feature Callout and Append Data
       this.initializeFeatureCallouts(i);
@@ -58,21 +66,45 @@ ProductCustomizer.prototype = {
       // Create Option Container, Options List, and Options
       this.initializeFeatureOptions(i);
       }
+
+      this.drawBackground(0);
+      this.drawOption(0, 0);
+
     },
 
-    initializeToolbar: function(i){
+    initializeFeatures: function(i){
       var featuresToolbar = document.getElementById('features-toolbar');
       var toolbarFeature = document.createElement('div');
       toolbarFeature.classList.add(productCustomizer.features[i].id, 'toolbar-feature', 'center-kids');
       toolbarFeature.setAttribute('value', i);
+      // Inject feature button picture below
       toolbarFeature.innerHTML = i;
+
       if(i == 0){
         toolbarFeature.setAttribute('selected', true);
       }
       featuresToolbar.appendChild(toolbarFeature);
       toolbarFeature.addEventListener('click', function(event){
+
+        var optionLists = document.querySelectorAll('.feature-option-list');
+        var selectedOption;
+        for(var z = 0; z < optionLists.length; z++){
+          if(optionLists[z].getAttribute('value') == event.target.getAttribute('value')){
+            subOptions = optionLists[z].querySelectorAll('.feature-option');
+            for(var q = 0; q < subOptions.length; q++){
+              if(subOptions[q].checked){
+                selectedOption = subOptions[q].id;
+              }
+            }
+
+          }
+        }
         productCustomizer.toggleFeature(event);
+        productCustomizer.clearCanvas();
+        productCustomizer.drawBackground(i);
+        productCustomizer.drawOption(selectedOption, i);
       });
+
     },
 
     initializeFeatureCallouts: function(i){
@@ -115,8 +147,8 @@ ProductCustomizer.prototype = {
           var featureOptionBlock = document.createElement('div');
           featureOptionBlock.setAttribute('value', y);
 
-          var featureOptionLabel = document.createElement('label');
-          featureOptionLabel.setAttribute('for', y);
+          var featureOptionLabel = document.createElement('p');
+          featureOptionLabel.classList.add('option-label');;
           featureOptionLabel.innerHTML = productCustomizer.features[i].options[y].title
           if(productCustomizer.features[i].options[y].cost){
             featureOptionLabel.innerHTML += ' (+' + productCustomizer.features[i].options[y].cost + ')';
@@ -124,9 +156,20 @@ ProductCustomizer.prototype = {
 
           var featureOption = document.createElement('input');
           featureOption.setAttribute('type', 'radio');
-          featureOption.classList.add('feature-option');
+          featureOption.setAttribute('name', i);
           featureOption.setAttribute('value', productCustomizer.features[i].options[y].title);
           featureOption.setAttribute('id', y);
+          if(y == 0){
+            featureOption.setAttribute('selected', true);
+          }
+
+          featureOption.classList.add('feature-option');
+          featureOption.addEventListener('click', function(event){
+            productCustomizer.clearCanvas();
+            productCustomizer.drawBackground(i);
+            productCustomizer.drawOption(event.target.id, i);
+          });
+
 
           // If first option, set as selected
           if(y == 0){
@@ -140,6 +183,7 @@ ProductCustomizer.prototype = {
 
       // Append Feature List to Container
       document.getElementById('feature-option-container').appendChild(featureOptionList);
+
     },
 
     // Toggle a Feature and related Options
@@ -185,23 +229,30 @@ ProductCustomizer.prototype = {
 
     // Clear the canvas for redraw
     clearCanvas: function(){
-      context.clearRect(0, 0, canvas.width, canvas.height);
+      productCustomizer.context.clearRect(0, 0, productCustomizer.canvas.width, productCustomizer.canvas.height);
     },
 
     // Draw a feature's background
     drawBackground: function(featureNumber){
       var feature = productCustomizer.features[featureNumber];
-      context.drawImage(spritesheet,
-                        x_crop, y_crop, w_crop, h_crop,           // Where to crop the image on spritesheet
-                        0, 0, canvas_w, canvas_h);  // Where to paste the image on canvas
+      productCustomizer.context.drawImage(productCustomizer.spritesheet,
+                        feature.cells.left, feature.cells.top, feature.cells.width, feature.cells.height,           // Where to crop the image on spritesheet
+                        0, 0, feature.cells.width, feature.cells.height);  // Where to paste the image on canvas
+      // Below functions work
+      // productCustomizer.context.rect(20,20,150,100);
+      // productCustomizer.context.fillStyle = "red";
+      // productCustomizer.context.fill();
     },
 
-    drawOption: function(featureNumber, optionNumber){
+    drawOption: function(optionNumber, featureNumber){
+
       var feature = productCustomizer.features[featureNumber];
       var option = feature.options[optionNumber];
-      context.drawImage(spritesheet,
-                        x_crop, y_crop, w_crop, h_crop,           // Where to crop the image on spritesheet
-                        canvas_x, canvas_y, canvas_w, canvas_h);  // Where to paste the image on canvas
+      productCustomizer.context.drawImage(productCustomizer.spritesheet,
+                        option.left, option.top, option.width, option.height,           // Where to crop the image on spritesheet
+                        feature.optionPlacement.left, feature.optionPlacement.top, option.width, option.height);  // Where to paste the image on canvas
+
+
     },
 
     // GET and SET Product Configuration Data to Server
