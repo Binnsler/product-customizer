@@ -13,12 +13,15 @@ var productData = {
   features: [
     ...
     { title: "Zipper",
-      description: "Lucas ipsum dolor sit amet organa darth mon mace dagobah alderaan coruscant hutt ben amidala. Solo kashyyyk dooku skywalker mandalore boba jabba. Kamino moff calrissian kenobi luuke dooku ackbar.",
+      id: "zipper",
+      description: "Han Solo ipsum dolor sit amet organa darth mon mace dagobah alderaan coruscant hutt ben amidala. Solo kashyyyk dooku skywalker mandalore boba jabba. Kamino moff calrissian kenobi luuke dooku ackbar.",
       optionType: "radio",
+      cells: {left: 0, top: 0, width: 800, height: 400},
+      optionPlacement: {left: 100, top: 200},
       options: [
-        {title: "Without"},
-        {title: "With", cost: 5},
-        {title: "With + Reflective", cost 10}
+        {title: "Short", left: 0, top: 400, width: 100, height: 100},
+        {title: "3/4", cost: 10, left: 100, top: 400, width: 100, height: 100},
+        {title: "Full", cost: 10, left: 200, top: 400, width: 100, height: 100, selected: true}
       ]
     },
     ...
@@ -27,78 +30,27 @@ var productData = {
 };
 ```
 
-#### Creating Features Tooler, Feature Callouts, and Feature Configs
+#### Creating Features Toolbar, Feature Callouts, and Feature Configs
 ```javascript
 var productCustomizer.prototype = {
   ...
-  initializeCustomizer: function(productData){
+  initializeCustomizer: function(){
 
-    for(var i=0; i < productData.features.length; i++){
+    for(var i=0; i < productCustomizer.features.length; i++){
 
       // Get Toolbar and append Toolbar Features
-      var featuresToolbar = document.getElementById('features-toolbar');
-      var toolbarFeature = document.createElement('div');
-      toolbarFeature.classList.add(productData.features[i].title, 'toolbar-feature');
-      toolbarFeature.setAttribute('value', i);
-      featuresToolbar.appendChild(toolbarFeature);
-
-      // Create Feature Callout
-      var featureCallout = document.createElement('div');
-      featureCallout.classList.add('feature-callout');
-      featureCallout.setAttribute('value', i);
-
-      // Create Feature Title and append to Callout
-      var featureTitle = document.createElement('h3');
-      featureTitle.classList.add('feature-title');
-      featureTitle.innerHTML = productData.features[i].title;
-      featureCallout.appendChild(featureTitle);
-
-      // Create Feature Description and append to Callout
-      var featureDescription = document.createElement('p');
-      featureDescription.classList.add('feature-description');
-      featureDescription.innerHTML = productData.features[i].description;
-      featureCallout.appendChild(featureDescription);
-
-      // Create Feature Callout Container
-      var featureCalloutContainer = document.getElementById('feature-callout-container');
-      // Append the Callout into the Container
-      featureCalloutContainer.appendChild(featureCallout);
-
-      // Create Option Container
-      var featureOptionContainer = document.createElement('div');
-      featureOptionContainer.classList.add(productData.features[i].title, 'feature-option-container');
-      featureOptionContainer.setAttribute('value', i);
-
-      // Iterate over Features 'Options' array and create form elements for each
-
-        for(var y = 0; y < productData.features[i].options.length; y++){
-          var featureOption = document.createElement('input');
-          featureOption.classList.add('feature-option');
-          featureOption.setAttribute('value', productData.features[i].options[y].title);
-          featureOption.setAttribute('type', 'radio');
-          if(productData.features[i].options[y].cost){
-            featureOption.innerHTML = productData.features[i].options[y].title + ' + (' + productData.features[i].options[y].cost + ')';
-          };
-          // If first option, set as selected
-          if(y == 0){
-            featureOption.checked = true;
-          }
-          // Append Feature to it's Container
-          featureOptionContainer.appendChild(featureOption);
-        }
+      this.initializeFeatures(i);
+      // Create Feature Callout and Append Data
+      this.initializeFeatureCallouts(i);
+      // Create Option Container, Options List, and Options
+      this.initializeFeatureOptions(i);
       }
-    }
-  },
-  ...
-};
-```
 
-#### GET and SET Product Configuration Data to Server
-```javascript
-var productCustomizer.prototype = {
-  ...
-  getData: function(){},
-  setData: function(){},
+      // On initial load, draw the first background and the selected option (or the first if none are selected)
+      this.drawBackground(0);
+      this.drawOption(productCustomizer.firstSelected(), 0);
+
+    },
   ...
 };
 ```

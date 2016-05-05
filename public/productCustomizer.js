@@ -16,7 +16,7 @@ var ProductCustomizer = function(){
       options: [
         {title: "Short", left: 0, top: 400, width: 100, height: 100},
         {title: "3/4", cost: 10, left: 100, top: 400, width: 100, height: 100},
-        {title: "Full", cost: 10, left: 200, top: 400, width: 100, height: 100}
+        {title: "Full", cost: 10, left: 200, top: 400, width: 100, height: 100, selected: true}
       ]
     },
 
@@ -29,7 +29,7 @@ var ProductCustomizer = function(){
       options: [
         {title: "Without", left: 300, top: 400, width: 100, height: 100},
         {title: "With", cost: 5, left: 400, top: 400, width: 100, height: 100},
-        {title: "With + Reflective", cost: 10, left: 500, top: 400, width: 100, height: 100}
+        {title: "With + Reflective", cost: 10, left: 500, top: 400, width: 100, height: 100, selected: true}
       ]
     },
 
@@ -43,7 +43,7 @@ var ProductCustomizer = function(){
         {title: "Power Seam", left: 600, top: 400, width: 100, height: 100},
         {title: "Power Seam Flat", cost: 10, left: 700, top: 400, width: 100, height: 100},
         {title: "Power Seam Piping / Side Panels", cost: 10, left: 800, top: 400, width: 100, height: 100},
-        {title: "Power Seam Piping Arms / Side Panels", cost: 10, left: 900, top: 400, width: 100, height: 100},
+        {title: "Power Seam Piping Arms / Side Panels", cost: 10, left: 900, top: 400, width: 100, height: 100, selected: true},
       ]
     },
 
@@ -59,16 +59,15 @@ ProductCustomizer.prototype = {
 
       // Get Toolbar and append Toolbar Features
       this.initializeFeatures(i);
-
       // Create Feature Callout and Append Data
       this.initializeFeatureCallouts(i);
-
       // Create Option Container, Options List, and Options
       this.initializeFeatureOptions(i);
       }
 
+      // On initial load, draw the first background and the selected option (or the first if none are selected)
       this.drawBackground(0);
-      this.drawOption(0, 0);
+      this.drawOption(productCustomizer.firstSelected(), 0);
 
     },
 
@@ -77,32 +76,22 @@ ProductCustomizer.prototype = {
       var toolbarFeature = document.createElement('div');
       toolbarFeature.classList.add(productCustomizer.features[i].id, 'toolbar-feature', 'center-kids');
       toolbarFeature.setAttribute('value', i);
-      // Inject feature button picture below
-      toolbarFeature.innerHTML = i;
-
       if(i == 0){
         toolbarFeature.setAttribute('selected', true);
       }
+
+      // Inject feature button picture below
+      toolbarFeature.innerHTML = i;
+
+      // Append feature to toolbar
       featuresToolbar.appendChild(toolbarFeature);
+
+      // On feature click, toggle the correct feature, redraw background, and draw the currently checked option
       toolbarFeature.addEventListener('click', function(event){
-
-        var optionLists = document.querySelectorAll('.feature-option-list');
-        var selectedOption;
-        for(var z = 0; z < optionLists.length; z++){
-          if(optionLists[z].getAttribute('value') == event.target.getAttribute('value')){
-            subOptions = optionLists[z].querySelectorAll('.feature-option');
-            for(var q = 0; q < subOptions.length; q++){
-              if(subOptions[q].checked){
-                selectedOption = subOptions[q].id;
-              }
-            }
-
-          }
-        }
         productCustomizer.toggleFeature(event);
         productCustomizer.clearCanvas();
         productCustomizer.drawBackground(i);
-        productCustomizer.drawOption(selectedOption, i);
+        productCustomizer.drawOption(productCustomizer.selectedOption(event), i);
       });
 
     },
@@ -159,23 +148,25 @@ ProductCustomizer.prototype = {
           featureOption.setAttribute('name', i);
           featureOption.setAttribute('value', productCustomizer.features[i].options[y].title);
           featureOption.setAttribute('id', y);
-          if(y == 0){
+          featureOption.classList.add('feature-option');
+          // Selected is used by methods for drawing, checked is used to visually check the radio buttons
+          if(productCustomizer.features[i].options[y].selected){
             featureOption.setAttribute('selected', true);
+            featureOption.checked = true;
+          }
+          else if(y == 0){
+            featureOption.setAttribute('selected', true);
+            featureOption.checked = true;
           }
 
-          featureOption.classList.add('feature-option');
+          // On option click, redraw the background and draw the selected option
           featureOption.addEventListener('click', function(event){
             productCustomizer.clearCanvas();
             productCustomizer.drawBackground(i);
             productCustomizer.drawOption(event.target.id, i);
           });
 
-
-          // If first option, set as selected
-          if(y == 0){
-            featureOption.checked = true;
-          }
-          // Append Feature to its Block, and then Blocks to the List
+          // Append Feature and Label to its Block, and then Blocks to the List
           featureOptionBlock.appendChild(featureOption);
           featureOptionBlock.appendChild(featureOptionLabel);
           featureOptionList.appendChild(featureOptionBlock);
@@ -238,10 +229,6 @@ ProductCustomizer.prototype = {
       productCustomizer.context.drawImage(productCustomizer.spritesheet,
                         feature.cells.left, feature.cells.top, feature.cells.width, feature.cells.height,           // Where to crop the image on spritesheet
                         0, 0, feature.cells.width, feature.cells.height);  // Where to paste the image on canvas
-      // Below functions work
-      // productCustomizer.context.rect(20,20,150,100);
-      // productCustomizer.context.fillStyle = "red";
-      // productCustomizer.context.fill();
     },
 
     drawOption: function(optionNumber, featureNumber){
@@ -253,6 +240,34 @@ ProductCustomizer.prototype = {
                         feature.optionPlacement.left, feature.optionPlacement.top, option.width, option.height);  // Where to paste the image on canvas
 
 
+    },
+
+    // Helper Functions.........................................................
+
+    firstSelected: function(){
+      for(var h=0; h < productCustomizer.features[0].options.length; h++){
+        if(productCustomizer.features[0].options[h].selected){
+          return h;
+        }
+      }
+      return 0;
+    },
+
+    // The below method simply finds what option is checked in the feature that was just clicked so the option can be drawn
+    // using the drawOption() method call
+    selectedOption: function(event){
+      var optionLists = document.querySelectorAll('.feature-option-list');
+      for(var z = 0; z < optionLists.length; z++){
+        if(optionLists[z].getAttribute('value') == event.target.getAttribute('value')){
+          subOptions = optionLists[z].querySelectorAll('.feature-option');
+          for(var q = 0; q < subOptions.length; q++){
+            if(subOptions[q].checked){
+              return subOptions[q].id;
+            }
+          }
+
+        }
+      }
     },
 
     // GET and SET Product Configuration Data to Server
