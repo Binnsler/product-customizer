@@ -30,7 +30,7 @@ var productData = {
 };
 ```
 
-#### Creating Features Toolbar, Feature Callouts, and Feature Configs
+#### Creating Features Toolbar, Feature Callouts, and Feature Options
 ```javascript
 var productCustomizer.prototype = {
   ...
