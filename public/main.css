@@ -4,7 +4,8 @@
 /* Container Classes */
 .product-customizer {width:100%; margin: 0 auto; postion:relative;}
 .customizer-toolbar {width: 22%; position:relative; display:inline-block; vertical-align: top;}
-.canvas-container {width: 56.6666666667%; display:inline-block; }
+.canvas-container {width: 56.6666666667%; display:inline-block; text-align: center; background-color:lightgrey;}
+#customizer-canvas {width:80%; max-width:900px;}
 
 
 /* Toolbar Features */
